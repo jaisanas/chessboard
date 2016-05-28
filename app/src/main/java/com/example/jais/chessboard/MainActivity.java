@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                mTextView.setText("");
                                 // update TextView here!
                                 String url ="http://mobile.suitmedia.com/bl/chess.php";
 
@@ -57,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
                                         }, new Response.ErrorListener() {
                                     @Override
                                     public void onErrorResponse(VolleyError error) {
-                                        mTextView.setText("That didn't work!");
+                                        mTextView.setText("Something Happened On Connection!");
                                     }
                                 });
                                 // Add the request to the RequestQueue.
