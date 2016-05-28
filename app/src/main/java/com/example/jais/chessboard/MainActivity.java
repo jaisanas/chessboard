@@ -1,7 +1,6 @@
 package com.example.jais.chessboard;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,35 +27,50 @@ public class MainActivity extends AppCompatActivity {
         final TextView mTextView = (TextView) findViewById(R.id.textView);
         final SquareAdapter sq = new SquareAdapter(this);
         final RequestQueue queue = Volley.newRequestQueue(this);
-        new Handler().postDelayed(new Runnable() {
+        Thread t = new Thread() {
+
+            @Override
             public void run() {
-                // Instantiate the RequestQueue.
-
-                String url ="http://mobile.suitmedia.com/bl/chess.php";
-
-                // Request a string response from the provided URL.
-                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                        new Response.Listener<String>() {
+                try {
+                    while (!isInterrupted()) {
+                        Thread.sleep(1000);
+                        runOnUiThread(new Runnable() {
                             @Override
-                            public void onResponse(String response) {
-                                // Display the first 500 characters of the response string.
-                                String anotherResponse = response.replace("<br/>","-");
-                                String [] splits = anotherResponse.split("-");
-                                Piece p = new Piece(splits);
-                                final HashMap<Integer,Integer> dataParameter = p.getData();
-                                sq.setDataParameter(dataParameter);
-                                chessboardGridView.setAdapter(sq);
+                            public void run() {
+                                // update TextView here!
+                                String url ="http://mobile.suitmedia.com/bl/chess.php";
+
+                                // Request a string response from the provided URL.
+                                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+
+                                        new Response.Listener<String>() {
+                                            @Override
+                                            public void onResponse(String response) {
+                                                // Display the first 500 characters of the response string.
+                                                String anotherResponse = response.replace("<br/>","-");
+                                                String [] splits = anotherResponse.split("-");
+                                                Piece p = new Piece(splits);
+                                                final HashMap<Integer,Integer> dataParameter = p.getData();
+                                                sq.setDataParameter(dataParameter);
+                                                chessboardGridView.setAdapter(sq);
+                                            }
+                                        }, new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        mTextView.setText("That didn't work!");
+                                    }
+                                });
+                                // Add the request to the RequestQueue.
+                                queue.add(stringRequest);
                             }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        mTextView.setText("That didn't work!");
+                        });
                     }
-                });
-                // Add the request to the RequestQueue.
-                queue.add(stringRequest);
+                } catch (InterruptedException e) {
+                }
             }
-        }, 3000);
+        };
+
+        t.start();
 
 
     }
